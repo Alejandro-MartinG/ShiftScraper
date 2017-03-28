@@ -3,6 +3,8 @@ defmodule ShiftScraper.Code do
 end
 
 defmodule ShiftScraper do
+  use Timex
+
   @doc """
   noi?
   """
@@ -19,7 +21,7 @@ defmodule ShiftScraper do
 
   defp pretty_print(results) do
     Enum.map(results, fn(x) ->
-      IO.puts("#{x.code_ps} : #{x.reward}")
+      IO.puts("#{x.date} \t #{x.code_ps} : #{x.reward}")
     end)
   end
 
@@ -56,7 +58,7 @@ defmodule ShiftScraper do
       {value, 1} ->
         parse_reward(value, shift_code)
       {value, 2} ->
-        %{shift_code | date: value}
+        parse_date(value, shift_code)
       {value, 3} ->
         parse_status(value, shift_code)
       {value, 4} ->
@@ -70,8 +72,17 @@ defmodule ShiftScraper do
     end
   end
 
+  defp parse_date(value, shift_code) do
+    case Regex.named_captures(~r/(?<m>[a-z]{3})([a-z]+)?\s+(?<d>\d{1,2}),\s(?<y>\d{4})/i, value) do
+      %{"y" => y, "m" => m, "d" => d} ->
+        %{shift_code | date: Timex.parse!("#{m}-#{d}-#{y}", "{Mshort}-{D}-{YYYY}")}
+      _ ->
+        shift_code
+    end
+  end
+
   defp parse_reward(value, shift_code) do
-    value = String.replace(value, "\n", "")
+    value = String.replace(value, "\n", " ")
     key_count = Regex.named_captures(~r/(?<keys>\d+)(.+)?golden key/i, value)
     %{shift_code | reward: value, keys: key_count["keys"]}
   end

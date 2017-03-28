@@ -30,7 +30,8 @@ defmodule ShiftScraper.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.10.0"},
-      {:floki, "~> 0.14.0"}
+      {:floki, "~> 0.14.0"},
+      {:timex, "~> 3.0"}
     ]
   end
 end
